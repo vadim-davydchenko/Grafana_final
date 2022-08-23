@@ -47,4 +47,7 @@
   allowed_domains =
   allowed_groups = 
 ```
+
 #### 3.Connect Promeheus to Grafana with authentication and TLS.
+- Create certificates for Prometheus:
+  
