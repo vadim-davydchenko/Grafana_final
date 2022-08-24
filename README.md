@@ -102,10 +102,52 @@
       - targets: ['<IP Grafana1>:3000']
   - job_name: "grafana2"
     static_configs:
-      - targets: ['<IP Grafana2>8:3000']
+      - targets: ['<IP Grafana2>:3000']
   - job_name: "nginx-exporter"
     static_configs:
       - targets: ['<IP Nginx>:9113']
   ```
 #### 6.Create a cluster monitoring dashboard containing the following panels
+
+- Prometheus
+  - Total number of records in TSDB so far   `rate(prometheus_tsdb_head_samples_appended_total[1m])`
+  - Rate requests to Prometheus (QPS)        `prometheus_http_request_duration_seconds_bucket`
+  - Main parameters CPU, ROM, RAM, I/O, Network
+    
+    ```
+    rate(node_network_receive_bytes_total[1m])
+    rate(node_cpu_seconds_total{mode="system"}[1m])
+    node_disk_write_time_seconds_total
+    node_disk_read_time_seconds_total
+    node_filesystem_files_free
+    node_disk_io_now
+    ```
+- PostgreSQL
+  - Install `PostgreSQl exporter`
+
+```
+wget https://github.com/prometheus-community/postgres_exporter/releases/download/v0.9.0/postgres_exporter-0.9.0.linux-amd64.tar.gz
+tar xvfz postgres_exporter-*.linux-amd64.tar.gz
+cd postgres_exporter-*.linux-amd64
+export DATA_SOURCE_NAME='postgres://grafana:admin123@<IP Postgres>:5432/grafana?sslmode=disable'
+./postgres_exporter
+```
+  - Version PostgreSQL        `pg_static`
+  - Current number of connections (sessions)     `sum(pg_stat_database_numbackends)`
+  - Load rate (number of requests per unit of time)     `sum(irate(pg_stat_database_xact_commit[5m])) + sum(irate(pg_stat_database_xact_rollback[5m]))` 
+ 
+- Grafana
+  - Number of organizations, users, dashboards  
+ 
+    `sum(grafana_stat_total_orgs)`
+    `sum(grafana_stat_total_users)`
+    `sum(grafana_stat_total_dashboards)`
+    
+  - Status distribution of response codes
   
+    `grafana_api_response_status_total`
+- Nginx
+  - Current status service    `nginx_up`
+  - Rate of received connections broken down by status     `nginx_connections_accepted` and `nginx_connections_handled`
+  - Rate of the total number of client requests   `nginx_http_requests_total`
+   
