@@ -19,7 +19,7 @@
     url = postgres://grafana:admin123@<ip adress DB>/grafana
     [server]
     domain = load_balancing.724c.kis.im
-    root_url = http://load_balancing.724c.kis.im/  #DNS Record
+    root_url = http://load_balancing.724c.kis.im/  #DNS Record Nginx
     enable_gzip = true
   ```
 - Install and setting `Nginx`
@@ -50,4 +50,33 @@
 
 #### 3.Connect Promeheus to Grafana with authentication and TLS.
 - Create certificates for Prometheus:
+  ```sudo mkdir -p /etc/prometheus-certs && cd /etc/prometheus-certs
+     sudo openssl req -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout prometheus.key -out prometheus.crt -subj "/C=RU/ST=Moscow/L=Moscow/O=Rebrain/CN=<DNS Record Prometheus>" -addext "subjectAltName = DNS:<DNS Record Prometheus>"
+- Create [config Nginx](https://github.com/vadim-davydchenko/grafana_final/blob/master/prometheus.conf) for Prometheus
+- Run Prometheus with arguments
+
+  `sudo systemctl stop prometheus`
+  
+  `cd /usr/local/bin`
+  ```
+  sudo prometheus \
+  --config.file=/etc/prometheus/prometheus.yml \
+  --web.external-url=https://prometheus_proxy.a951.kis.im \
+  --web.route-prefix="/"
+  ```
+- Setup basic_auth
+
+  `sudo apt update`
+  
+  `sudo apt install  -y apache2-utils`
+  
+  `sudo htpasswd -c .htpasswd admin`
+  
+- Add parameters `auth_basic` and `auth_basic_user_file` in `prometheus.conf`
+- Check Prometheus metrics
+  
+  `sudo curl -u admin -k https://<DNS-Record Prometheus>/metrics`
+- Add data source in `Grafana`
+  
+  ![alt text](https://github.com/vadim-davydchenko/grafana_final/blob/master/Data%20Source%20Grafana.jpg)
   
