@@ -80,3 +80,32 @@
   
   ![alt text](https://github.com/vadim-davydchenko/grafana_final/blob/master/Data%20Source%20Grafana.jpg)
   
+#### 4.Setup on the node nginx Prometheus-nginx-exporter and setting Prometheus to collect metrics Nginx
+
+- Create in `conf.d` [exporter.conf](https://github.com/vadim-davydchenko/grafana_final/blob/master/exporter.conf) and delete `default.conf`:
+- Run docker container with `nginx-prometheus-exporter`
+
+  `docker run -p 9113:9113 nginx/nginx-prometheus-exporter:latest -nginx.scrape-uri http://<Ip nginx>:10080/nginx_stats`
+#### 5.Setting collect metrics Grafana herselfs and nginx-exporter in Prometheus
+
+- In `grafana.ini` include directives:
+  ```
+  [metrics]
+  enabled             = true
+  disable_total_stats = false
+  ```
+- In `Prometheus` add next targets
+  
+  ```
+  - job_name: "grafana1"
+    static_configs:
+      - targets: ['<IP Grafana1>:3000']
+  - job_name: "grafana2"
+    static_configs:
+      - targets: ['<IP Grafana2>8:3000']
+  - job_name: "nginx-exporter"
+    static_configs:
+      - targets: ['<IP Nginx>:9113']
+  ```
+#### 6.Create a cluster monitoring dashboard containing the following panels
+  
