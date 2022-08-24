@@ -112,7 +112,7 @@
 - Prometheus
   - Total number of records in TSDB so far   `rate(prometheus_tsdb_head_samples_appended_total[1m])`
   - Rate requests to Prometheus (QPS)        `prometheus_http_request_duration_seconds_bucket`
-  - Main parameters CPU, ROM, RAM, I/O, Network
+  - Main parameters CPU, ROM, RAM, I/O, Network (use `node_exporter`)
     
     ```
     rate(node_network_receive_bytes_total[1m])
@@ -150,4 +150,3 @@ export DATA_SOURCE_NAME='postgres://grafana:admin123@<IP Postgres>:5432/grafana?
   - Current status service    `nginx_up`
   - Rate of received connections broken down by status     `nginx_connections_accepted` and `nginx_connections_handled`
   - Rate of the total number of client requests   `nginx_http_requests_total`
-   
